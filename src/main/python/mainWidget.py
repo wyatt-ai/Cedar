@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QMessageBox,QCheckBox
+from PyQt5.QtWidgets import QMessageBox,QCheckBox,QHeaderView
 import MySQLdb as sql
 import pandas as pd
 from pandasModel import PandasModel
@@ -16,18 +16,20 @@ class MainWindow(QtWidgets.QWidget):
   def __init__(self,ui_base,parent=None):
     super(MainWindow, self).__init__(parent)
     layout = QtWidgets.QVBoxLayout()
-    self.instance =uic.loadUi(ui_base)
-    layout.addWidget(self.instance)
+    self.ui =uic.loadUi(ui_base)
+    layout.addWidget(self.ui)
     self.setLayout(layout)
 
     self.setWindowTitle("Cedar") 
     self.showMaximized()
 
 
-    self.instance.loadButton.clicked.connect(self.loadDatabase)
-    self.instance.populateButton.clicked.connect(self.populate_rows)
-    # self.instance.labelColLineEdit.clicked.connect(self.highlight_label_col)
-    self.instance.searchButton.clicked.connect(self.populate_rows)
+    self.ui.loadButton.clicked.connect(self.loadDatabase)
+    self.ui.populateButton.clicked.connect(self.populate_rows)
+    # self.ui.labelColLineEdit.clicked.connect(self.highlight_label_col)
+    self.ui.searchButton.clicked.connect(self.populate_rows)
+    self.ui.hideColLineEdit.textChanged.connect(self.hideColumns)
+    self.ui.resizeRowsButton.clicked.connect(self.resizeRows)
 
     self.checkboxes = []
 
@@ -60,7 +62,7 @@ class MainWindow(QtWidgets.QWidget):
         checkbox = QCheckBox(label)
         checkbox.setObjectName(key+"_table_checkbox")
         checkbox.setChecked(True)
-        self.instance.tableGrid.addWidget(checkbox,row,column)
+        self.ui.tableGrid.addWidget(checkbox,row,column)
         self.checkboxes.append(key)
         column+=1
         if column==8:
@@ -70,7 +72,8 @@ class MainWindow(QtWidgets.QWidget):
   def populate_rows(self):
 
 
-    self.search_term = self.instance.searchEdit.text()
+    self.search_term = self.ui.searchEdit.text()
+    self.search_cols = self.ui.searchFromCols.text()
 
     from_date="01-01-2018"
     to_date="01-01-2019"
@@ -86,25 +89,40 @@ class MainWindow(QtWidgets.QWidget):
     if successful_connection:
       checked_tables=[]
 
-      for child in self.instance.findChildren(QCheckBox):
+      for child in self.ui.findChildren(QCheckBox):
         if "table_checkbox" in child.objectName():
           if child.isChecked():
             checked_tables.append(child.objectName())
 
       for key in checked_tables:
         if self.search_term:
-          sql_select_query = ("SELECT * FROM {table} WHERE MATCH (Headline,Description)"
-          " AGAINST ('{keywords}' IN NATURAL LANGUAGE MODE)").format(table=key.replace("_table_checkbox",""),keywords=self.search_term)
+          sql_select_query = ("SELECT * FROM {table} WHERE MATCH {search_cols}"
+          " AGAINST ('{keywords}' IN NATURAL LANGUAGE MODE)").format(table=key.replace("_table_checkbox",""),keywords=self.search_term,search_cols=self.search_cols)
         else:
           sql_select_query = ("SELECT * FROM {table} LIMIT 100 ").format(table=key.replace("_table_checkbox",""))
         dataframe = pd.read_sql(sql_select_query, con=connection)
-        model = PandasModel(dataframe)
-        self.instance.tableView.setModel(model)
+        self.model = PandasModel(dataframe)
+        self.ui.tableView.setModel(self.model)
+        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
+  def hideColumns(self):
+    try:
+      n_cols = self.model.columnCount()
+      all_cols =  [i for i in range(0,n_cols)]
+      cols_to_hide = []
+      cols_from_line = self.ui.hideColLineEdit.text().split(",")
+      for i in cols_from_line:
+        try:
+          cols_to_hide.append(int(i.strip()))
+        except:
+          pass
+      for c in all_cols:
+        if c in cols_to_hide:
+          self.ui.tableView.setColumnHidden(int(c), True);
+        else:
+          self.ui.tableView.setColumnHidden(int(c), False);
+    except:
+      pass
 
-  # def highlight_label_col(self):
-
-
-
-
-
+  def resizeRows(self):
+    self.ui.tableView.resizeRowsToContents();
