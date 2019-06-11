@@ -1,5 +1,5 @@
 {
-    "app_name": "Labeller",
+    "app_name": "Cedar",
     "author": "Joshua Wyatt Smith",
     "main_module": "src/main/python/main.py",
     "version": "0.0.0"
