@@ -4,11 +4,16 @@ python:
   - "3.6"
 install:
   - pip install -r requirements/base.txt
-os: osx
+
+matrix:
+	include:
+		- os: osx
+		- dist: trusty
+		- dist: xenial
+		- os: windows
 
 notifications:
   email: on_failure
 
 script: 
 	- fbs freeze --debug
-	- fbs installer
