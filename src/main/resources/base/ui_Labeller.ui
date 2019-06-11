@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>552</height>
+    <width>1083</width>
+    <height>527</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,6 +40,20 @@
        <widget class="QPushButton" name="searchButton">
         <property name="text">
          <string>Search</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>from</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="searchFromCols">
+        <property name="placeholderText">
+         <string>i.e. &quot;(Headline,Description)&quot;</string>
         </property>
        </widget>
       </item>
@@ -576,6 +590,27 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Hide/Show Columns</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="hideColLineEdit">
+          <property name="placeholderText">
+           <string>comma seperated list, i.e.: 1,2,3</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="resizeRowsButton">
+          <property name="text">
+           <string>Resize rows to text</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QToolButton" name="optionsButton">
           <property name="toolTip">
            <string>Open Labeller settings</string>
@@ -634,6 +669,19 @@
          <string>dd/MM/yyyy HH:mm</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
