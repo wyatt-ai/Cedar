@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/wyatt-ai/Cedar.svg?branch=master)](https://travis-ci.org/wyatt-ai/Cedar)
 # Cedar
 ![alt text](src/main/icons/base/256.png "Cedar")
 
