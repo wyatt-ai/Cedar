@@ -9,5 +9,6 @@ os: osx
 notifications:
   email: on_failure
 
-script: fbs freeze --debug
-script: fbs installer
+script: 
+	- fbs freeze --debug
+	- fbs installer
