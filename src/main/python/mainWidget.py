@@ -20,7 +20,7 @@ class MainWindow(QtWidgets.QWidget):
     layout.addWidget(self.instance)
     self.setLayout(layout)
 
-    self.setWindowTitle("WyattAI Labeller") 
+    self.setWindowTitle("Cedar") 
     self.showMaximized()
 
 
