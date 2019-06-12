@@ -1,5 +1,11 @@
 language: python
 
+# linux deps
+addons:
+  apt:
+    packages:
+      - python3-setuptools
+
 # osx deps
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
@@ -17,8 +23,8 @@ matrix:
   include:
     - dist: trusty
       python: "3.5"
-    - dist: trusty
-      python: "3.6"
+    #- dist: trusty # 3.6 trusty has an issue with setuptools
+    #  python: "3.6"
     - os: osx
       language: generic
       env: TOXENV=py36
