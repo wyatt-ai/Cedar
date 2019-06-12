@@ -1,5 +1,11 @@
 language: python
 
+# linux deps
+addons:
+  apt:
+    packages:
+      - python3-setuptools
+
 # osx deps
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
