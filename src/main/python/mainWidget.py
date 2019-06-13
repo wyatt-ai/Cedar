@@ -1,11 +1,10 @@
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QMessageBox,QCheckBox,QHeaderView
+from PyQt5.QtWidgets import QWidget, QMessageBox,QCheckBox,QHeaderView,QItemDelegate
 import MySQLdb as sql
 import pandas as pd
 from pandasModel import PandasModel
 from qt_organisation import Organisation
 from cedar_settings import cedarSettings
-
 
 class MainWindow(QtWidgets.QWidget):
 
@@ -33,7 +32,6 @@ class MainWindow(QtWidgets.QWidget):
     self.ui.optionsButton.clicked.connect(self.settings_ui.show)
 
     self.ui.checkAllButton.clicked.connect(self.checkAll)
-
 
     self.checkboxes = []
 
@@ -87,6 +85,11 @@ class MainWindow(QtWidgets.QWidget):
     if self.seed_file=="None":
         QMessageBox.about(self, 'Seed file', 'Please set a seed file in settings')
 
+    col_label=self.ui.labelColLineEdit.text()
+    try:
+      editable_column = int(col_label)
+    except:
+      editable_column=False
 
     self.search_term = self.ui.searchEdit.text()
     self.search_cols = self.ui.searchFromCols.text()
@@ -119,8 +122,11 @@ class MainWindow(QtWidgets.QWidget):
         else:
           sql_select_query = ("SELECT * FROM {table} LIMIT 100 ").format(table=key.replace("_table_checkbox",""))
         dataframe = pd.read_sql(sql_select_query, con=connection)
-        self.model = PandasModel(dataframe)
+
+        self.model = PandasModel(dataframe,editable_column)
         self.ui.tableView.setModel(self.model)
+        self.ui.tableView.selectionModel().currentChanged.connect(self.selChanged)
+
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
   def hideColumns(self):
@@ -163,3 +169,8 @@ class MainWindow(QtWidgets.QWidget):
         file = open(fn, 'w')
     file.write(text+"\n")
     file.close()
+
+  def selChanged(self):
+    print("OVER HERE")
+
+
