@@ -1,34 +1,37 @@
 language: python
-
-# linux deps
 addons:
   apt:
     packages:
-      - python3-setuptools
-
-# osx deps
+    - python3-setuptools
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew list python3 &>/dev/null || brew install python3; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install mysql; fi
-
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew list python3 &>/dev/null || brew
+  install python3; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install mysql; fi
 install:
-  - python3 --version
-  - pip3 install -r requirements/base.txt
-
-script: 
-  - fbs freeze --debug
-
+- python3 --version
+- pip3 install -r requirements/base.txt
+script:
+- fbs freeze --debug
+- fbs installer
 matrix:
   include:
-    - dist: trusty
-      python: "3.5"
-    #- dist: trusty # 3.6 trusty has an issue with setuptools
-    #  python: "3.6"
-    - os: osx
-      language: generic
-      env: TOXENV=py36
-    - os: windows
-      language: generic
+  - dist: trusty
+    python: '3.5'
+  - os: osx
+    language: generic
+    env: TOXENV=py36
+  - os: windows
+    language: generic
   allow_failures:
-    - os: windows
+  - os: windows
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: yhRiWw4LoyJ3zSjvbod0lnTkCfXexrY3Yeic6PtgmqxLEwMqvbTCJ00SPyNIy5c2ADhBnWVD3g/al9QRS5ouj0XqefAS9SnDwk6acK4GqBTISedxA+nMS5MXNuyJsqpgRNXri7nGqZSaBhpqYgXVuEnOBpnOVcPWFNPHbJGYVHbWZHaSpgG3MPLeX/w18/RlCtJOl8NlgrHV9vflzWGO0R4XV2MteN+OwBVFXzQW2dX5YRLm+EoqjIjGL0QuwfFaZIjzqZOJYL3eD3gDtUs221i0+562HClYD0c1mkBVYOUEZ667qtfbZOU1qtkwxLvdWn5Sk4KDW+mM51uZ5svAOK/X5DKPuEmOWwm5fHzZI5v7Bd56km/lB4JHFw1LJcRc4GoS3SX8hX+REJZuhl9xQAt4fUI+C0ckpIjbpRCcBdgvlHANI1t4KOOUQcqD+ibzOCWUAffM4IC8rPcslkOGVS1XB+GQq4TE9E3SyeDA90w/VDrgu9AkZ1d/X9hhrBpw25ovfWIuml1M4tBMSOpeaY5ZFIfQw0lR7/mZWTjahYhBTfY0gE3IEuu3rJVeqJNVqSJYnw9GCprKjFFrpnBmhcALe5upmEMe6eFmgKibGtLMNBxEanFBFuhViKFr8qtZNke1laf81evvYhBJkYOzKeSfgJ0BAD/ERUOpYD28Fpg=
+  file:
+    - "target/Cedar.dmg"
+  on:
+    repo: wyatt-ai/Cedar
+    tags: true
