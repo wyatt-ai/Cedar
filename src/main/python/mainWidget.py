@@ -91,6 +91,8 @@ class MainWindow(QtWidgets.QWidget):
     self.search_term = self.ui.searchEdit.text()
     self.search_cols = self.ui.searchFromCols.text()
 
+    self.writeToSeed("SearchTerm="+self.search_term)
+
     from_date="01-01-2018"
     to_date="01-01-2019"
 
@@ -153,5 +155,11 @@ class MainWindow(QtWidgets.QWidget):
         for child in self.ui.findChildren(QCheckBox):
               child.setChecked(False)
 
-  # def showSettings(self):
-  #     self.settings_ui.show()
+  def writeToSeed(self,text):
+    fn = self.cedarSettings.value("seed_file")
+    try:
+        file = open(fn, 'a')
+    except IOError:
+        file = open(fn, 'w')
+    file.write(text+"\n")
+    file.close()
