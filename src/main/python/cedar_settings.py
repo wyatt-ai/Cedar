@@ -51,7 +51,8 @@ class cedarSettings:
     def openFile(self):    
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fname = QFileDialog.getSaveFileName(options=options)
+        filters = "Text files (*.txt)"
+        fname = QFileDialog.getSaveFileName(None,"Set seed file","",filters,options=options)
         self.ui.fileSavelineEdit.setText(fname[0])
         self.cedarSettings.setValue("seed_file",self.ui.fileSavelineEdit.text())
 
