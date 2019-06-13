@@ -6,22 +6,6 @@ from pandasModel import PandasModel
 from qt_organisation import Organisation
 from cedar_settings import cedarSettings
 
-
-class PopupView(QWidget):
-    def __init__(self, parent=None):
-        super(PopupView, self).__init__(parent)
-        self.setWindowFlags(Qt.Popup)
-
-class ItemDelegate(QItemDelegate):
-    def __init__(self, parent):
-        super(ItemDelegate, self).__init__(parent)
-
-    def createEditor(self, parent, option, index):
-        return PopupView(parent)
-
-    def updateEditorGeometry(self, editor, option, index):
-        editor.move(QCursor.pos())
-
 class MainWindow(QtWidgets.QWidget):
 
   def __init__(self,ui_base,ui_settings,parent=None):
@@ -141,10 +125,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.model = PandasModel(dataframe,editable_column)
         self.ui.tableView.setModel(self.model)
-
-
-    # delegate = ItemDelegate(self.ui.tableView)
-    # self.ui.tableView.setItemDelegate(delegate)
+        self.ui.tableView.selectionModel().currentChanged.connect(self.selChanged)
 
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
@@ -189,5 +170,7 @@ class MainWindow(QtWidgets.QWidget):
     file.write(text+"\n")
     file.close()
 
+  def selChanged(self):
+    print("OVER HERE")
 
 
