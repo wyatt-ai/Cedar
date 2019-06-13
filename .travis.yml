@@ -16,8 +16,8 @@ script:
 - fbs installer
 matrix:
   include:
-  - dist: trusty
-    python: '3.5'
+#   - dist: trusty
+#     python: '3.5'
   - os: osx
     language: generic
     env: TOXENV=py36
