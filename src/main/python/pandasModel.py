@@ -2,6 +2,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt,QAbstractItemModel
 from PyQt5.QtGui import QBrush,QColor
 import pandas as pd
+from qt_organisation import Organisation
+
 
 class PandasModel(QtCore.QAbstractTableModel): 
 
@@ -9,6 +11,9 @@ class PandasModel(QtCore.QAbstractTableModel):
         QtCore.QAbstractTableModel.__init__(self, parent=parent)
         self.editable_column = editable_column
         self._df = df
+
+        self.cedarSettings=Organisation().use_namespace("CedarGeneral")
+
 
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         if role != QtCore.Qt.DisplayRole:
@@ -28,10 +33,10 @@ class PandasModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid():
             return QtCore.QVariant()
-        elif role == Qt.BackgroundRole:
-            if self.editable_column!=False:
-                if index.column() == self.editable_column:
-                    return QBrush(QColor(152,251,152))
+        # elif role == Qt.BackgroundRole:
+            # if self.editable_column!=False:
+                # if index.column() == self.editable_column:
+                #     return QBrush(QColor(0,0,153))
         elif role != Qt.DisplayRole:
             return QtCore.QVariant()
         return QtCore.QVariant(str(self._df.ix[index.row(), index.column()]))
@@ -60,7 +65,25 @@ class PandasModel(QtCore.QAbstractTableModel):
             if dtype != object:
                 value = None if value == '' else dtype.type(value)
         self._df.at[row,col]=value
+
+        # self.connect.dataChanged(index(0, 0), index(self.rowCount() - 1, 0),[])
+        self.dataChanged(self._df.iloc[row])
+
         return True
+
+
+    @QtCore.pyqtSlot()
+    def dataChanged(self,df):
+        dictionary = df.to_dict()
+        fn = self.cedarSettings.value("seed_file")
+        try:
+            file = open(fn, 'a')
+        except IOError:
+            file = open(fn, 'w')
+        file.write(str(dictionary))
+        file.write("\n")
+        file.close()
+
 
     def rowCount(self, parent=QtCore.QModelIndex()): 
         return len(self._df.index)
