@@ -43,7 +43,7 @@ class MainWindow(QtWidgets.QWidget):
 
     successful_connection=False
     try:
-        connection = sql.connect(self.host, self.user, self.password, self.database)
+        connection = sql.connect(self.host, self.user, self.password, self.database, port=3307)
         # QMessageBox.about(self, 'Connection', 'Database Connected Successfully')
         successful_connection=True
     except sql.Error as e:
@@ -125,7 +125,6 @@ class MainWindow(QtWidgets.QWidget):
 
         self.model = PandasModel(dataframe,editable_column)
         self.ui.tableView.setModel(self.model)
-        self.ui.tableView.selectionModel().currentChanged.connect(self.selChanged)
 
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
@@ -170,7 +169,5 @@ class MainWindow(QtWidgets.QWidget):
     file.write(text+"\n")
     file.close()
 
-  def selChanged(self):
-    print("OVER HERE")
 
 
