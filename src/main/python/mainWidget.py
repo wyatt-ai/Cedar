@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QWidget, QMessageBox,QCheckBox,QHeaderView,QItemDelegate
+from PyQt5.QtCore import Qt
 import MySQLdb as sql
 import pandas as pd
 from pandasModel import PandasModel
@@ -34,6 +35,11 @@ class MainWindow(QtWidgets.QWidget):
     self.ui.checkAllButton.clicked.connect(self.checkAll)
 
     self.checkboxes = []
+
+
+    self.dialog_scrollbar = self.ui.tableView.verticalScrollBar()
+    self.dialog_scrollbar.valueChanged.connect(self.load_on_the_fly,Qt.UniqueConnection)
+
 
   def loadDatabase(self):
     self.host=self.cedarSettings.value("host","none")
@@ -81,20 +87,28 @@ class MainWindow(QtWidgets.QWidget):
 
   def populate_rows(self):
 
+    self.search_term = self.ui.searchEdit.text()
+    self.search_cols = self.ui.searchFromCols.text()
+
     self.seed_file = self.cedarSettings.value("seed_file","None")
     if self.seed_file=="None":
         QMessageBox.about(self, 'Seed file', 'Please set a seed file in settings')
 
     col_label=self.ui.labelColLineEdit.text()
     try:
-      editable_column = int(col_label)
+      self.editable_column = int(col_label)
     except:
-      editable_column=False
-
-    self.search_term = self.ui.searchEdit.text()
-    self.search_cols = self.ui.searchFromCols.text()
+      self.editable_column=False
 
     self.writeToSeed("SearchTerm="+self.search_term)
+
+    self.dataframe = self.retrieve_data()
+    self.model = PandasModel(self.dataframe,self.editable_column)
+    self.ui.tableView.setModel(self.model)
+    self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+
+  def retrieve_data(self,offset=0,end=100):
 
     from_date="01-01-2018"
     to_date="01-01-2019"
@@ -120,13 +134,12 @@ class MainWindow(QtWidgets.QWidget):
           sql_select_query = ("SELECT * FROM {table} WHERE MATCH ({search_cols})"
           " AGAINST ('{keywords}' IN NATURAL LANGUAGE MODE)").format(table=key.replace("_table_checkbox",""),keywords=self.search_term,search_cols=self.search_cols)
         else:
-          sql_select_query = ("SELECT * FROM {table} LIMIT 100 ").format(table=key.replace("_table_checkbox",""))
+          sql_select_query = ("SELECT * FROM {table} LIMIT {end} OFFSET {offset} ").format(table=key.replace("_table_checkbox",""),end=end,offset=offset)
+
         dataframe = pd.read_sql(sql_select_query, con=connection)
 
-        self.model = PandasModel(dataframe,editable_column)
-        self.ui.tableView.setModel(self.model)
+      return dataframe
 
-        self.ui.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
   def hideColumns(self):
     try:
@@ -170,4 +183,22 @@ class MainWindow(QtWidgets.QWidget):
     file.close()
 
 
+  def load_on_the_fly(self):
+    ''' Load 100 results when reaching the bottom
+        Actually seems to load more for some reason, but seems to work
+    '''
+    value = self.dialog_scrollbar.value()
+    max_scroll = self.dialog_scrollbar.maximum()
+    if value == max_scroll:
+      last_row=self.model.rowCount()
+      new_df = self.retrieve_data(offset=int(last_row))
+      # Concatenate dataframes
+      new_dataframe = pd.concat([self.dataframe,new_df],ignore_index=True)
+      # # Disable all signals temporarily 
+      self.ui.tableView.blockSignals(True)
+      self.model = PandasModel(new_dataframe,self.editable_column)
+      self.dataframe=new_dataframe
+      self.ui.tableView.setModel(self.model)
+      # # Then re-add them
+      self.ui.tableView.blockSignals(False)
 

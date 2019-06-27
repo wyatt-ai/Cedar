@@ -65,8 +65,6 @@ class PandasModel(QtCore.QAbstractTableModel):
             if dtype != object:
                 value = None if value == '' else dtype.type(value)
         self._df.at[row,col]=value
-
-        # self.connect.dataChanged(index(0, 0), index(self.rowCount() - 1, 0),[])
         self.dataChanged(self._df.iloc[row])
 
         return True
